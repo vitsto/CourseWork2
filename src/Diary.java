@@ -10,8 +10,9 @@ public class Diary {
         this.tasks = new HashMap<>();
     }
 
-    public void addTask(Task task) {
+    public int addTask(Task task) {
         this.tasks.put(task.getId(), task);
+        return task.getId();
     }
 
     public List<Task> getRemovedTasks() {
@@ -19,13 +20,16 @@ public class Diary {
     }
 
     public void removeTask(int id) {
-        tasks.get(id).setRemoved();
+        Task task = tasks.get(id);
+        if (task != null) {
+            task.setRemoved();
+            System.out.println("Задача " + task.getTitle() + " перенесена в архив");
+        } else {
+            System.out.println("Задачи с таким id(" + id + ") не существует");
+        }
     }
 
     public List<Task> groupByDate() {
-        // здесь inteliJ сам упростил код
-        // я сначала через стримы выбрал задачи, которые не удаленные
-        // а потом с помощью компаратора сортировал их
         return tasks.values().stream()
                 .filter(task -> !task.isRemoved())
                 .sorted((a, b) -> a.getDateTime().isAfter(b.getDateTime()) ? 1 : a.getDateTime().isEqual(b.getDateTime()) ? 1 : 0)
@@ -42,7 +46,7 @@ public class Diary {
 
         for (Map.Entry<Integer, Task> entry : tasks.entrySet()) {
             LocalDateTime taskDate = entry.getValue().getDateTime();
-            if (givenDate.isEqual(taskDate.toLocalDate())) { // проверка получения задач "на сегодня"
+            if (givenDate.isEqual(taskDate.toLocalDate())) {
                 tasksForDay.add(entry.getValue());
             }
             while (givenDate.isAfter(taskDate.toLocalDate())) {
